@@ -6,8 +6,6 @@ CREATE TABLE "Seller" (
     "email" TEXT NOT NULL,
     "phoneNumber" TEXT NOT NULL,
     "address" TEXT NOT NULL,
-    "idImageUrl" TEXT NOT NULL,
-    "businessPermitUrl" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 

@@ -9,7 +9,7 @@ export async function POST(
         const{userId} = auth()
         const body = await req.json()
 
-        const {name, email, phoneNumber, address, idImageUrl,  businessPermitUrl} = body
+        const {name, email, phoneNumber, address} = body
         if(!userId){
             return new NextResponse("UNnauthorized", {status:401}) 
         }
@@ -17,18 +17,16 @@ export async function POST(
         if(!name){
             return new NextResponse("Name is Required", {status:400})
         }
-        const store = await prismadb.seller.create({
+        const seller = await prismadb.seller.create({
             data: {
                 name,
                 userId,
                 email,
                 phoneNumber,
-                address,
-                idImageUrl,
-                businessPermitUrl,
+                address
             }
         })
-        return NextResponse.json(store)
+        return NextResponse.json(seller)
     }catch(error){
         console.log('STORES_POST', error)
         return new NextResponse("Internal Error", {status:500})
