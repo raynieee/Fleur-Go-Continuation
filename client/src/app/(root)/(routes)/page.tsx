@@ -1,19 +1,29 @@
-"use client"
-// import { Button } from "@/components/ui/button"
-// import { UserButton } from "@clerk/nextjs"
-// import {Modal} from "@/components/ui/modal"
-import { useStoreModal } from "@/hooks/use-store-modal"
+"use client";
 import { useEffect } from "react";
-const SetupPage = () => {
-    const onOpen = useStoreModal((state) => state.onOpen)
-    const isOpen = useStoreModal((state) => state.isOpen)
-  
-    useEffect(() => {
-      if (!isOpen) {
-        onOpen()
-      }
-    }, [isOpen, onOpen])
-  
-    return null
+import { useRouter } from "next/navigation";
+import { useUser } from "@clerk/nextjs";
+import { useHomeModal } from "@/hooks/use-home-modal";
+import { useStoreModal } from "@/hooks/use-store-modal";
+
+export default function Home() {
+  const { user } = useUser();
+const router = useRouter();
+const { onOpen: onHomeOpen, isOpen: isHomeOpen } = useHomeModal();
+const { onOpen: onStoreOpen, isOpen: isStoreOpen } = useStoreModal();
+
+useEffect(() => {
+  if (!user) {
+    router.push("/sign-in");
+  } else {
+    const roles = user.publicMetadata.roles as string[] || [];
+    if (roles.length === 0 || roles[0]!== "admin") {
+      onHomeOpen();
+    } else {
+      onStoreOpen();
+    }
   }
-  export default SetupPage
+}, [user, router, onHomeOpen, onStoreOpen]);
+
+return null;
+  return null;
+}

@@ -53,6 +53,7 @@ export const StoreModel = () => {
 
       const response = await axios.post('/api/sellers', storeData);
       
+      window.location.assign(`${response.data.id}`)
       if (response.status >= 200 && response.status < 300) {
         console.log(response.data);
         toast.success("Store Created Successfully");
