@@ -25,5 +25,4 @@ useEffect(() => {
 }, [user, router, onHomeOpen, onStoreOpen]);
 
 return null;
-  return null;
 }

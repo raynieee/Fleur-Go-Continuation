@@ -3,6 +3,7 @@ import { checkRole } from "@/lib/roles";
 import { SearchUsers } from "./../_search-users";
 import { clerkClient } from "@clerk/nextjs/server";
 import { setRole } from "../_actions";
+import prismadb from "@/lib/prismadb"
 
 export default async function AdminDashboard(params: {
   searchParams: { search?: string };
