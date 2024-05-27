@@ -5,7 +5,8 @@ import { auth } from "@clerk/nextjs/server";
 
 export function createShop(app: Express) {
   app.post("/admin/shops", async (req: Request) => {
-    const userId = await auth();
+    const authData = await auth();
+    const userId = String(authData.userId);
 
     try {
       const { name, phoneNumber, address, businessPermitUrl } = req.body;
@@ -46,7 +47,7 @@ export function getShopDetails(app: Express) {
       }
 
       const shop = await prismadb.shops.findUnique({
-        where: { id: shopId },
+        where: { id: Number(shopId) },
       });
 
       if (!shop) {
@@ -63,7 +64,8 @@ export function getShopDetails(app: Express) {
 
 export function updateShop(app: Express) {
   app.patch("/admin/shops/:shopId", async (req: Request) => {
-    const userId = await auth();
+    const authData = await auth();
+    const userId = String(authData.userId);
 
     try {
       const { shopId } = req.params;
@@ -105,7 +107,8 @@ export function updateShop(app: Express) {
 
 export function deleteShop(app: Express) {
   app.delete("/admin/shops/:shopId", async (req: Request) => {
-    const userId = await auth();
+    const authData = await auth();
+    const userId = String(authData.userId);
 
     try {
       const { shopId } = req.params;

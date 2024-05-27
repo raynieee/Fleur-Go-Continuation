@@ -2,21 +2,25 @@ import { Express, Request } from "express";
 import { NextResponse } from "next/server";
 import prismadb from "../lib/prismadb";
 import { auth } from "@clerk/nextjs/server";
+import bcrypt from "bcrypt";
 
 export function createUser(app: Express) {
   app.post("/admin/users", async (req: Request) => {
-    const userId = await auth();
+    const authData = await auth();
+    const userId = String(authData.userId);
 
     try {
-      const { firstName, lastName, userName, email, hashedPassword, role, phoneNumber, address, birthday } = req.body;
+      const { firstName, lastName, userName, email, password, role, phoneNumber, address, birthday } = req.body;
 
-      if (!firstName || !lastName || !userName || !email || !hashedPassword || !role || !phoneNumber || !address || !birthday) {
+      if (!firstName || !lastName || !userName || !email || !password || !role || !phoneNumber || !address || !birthday) {
         return NextResponse.json({ message: "All fields are required" }, { status: 400 });
       }
 
       if (phoneNumber.length < 11) {
         return NextResponse.json({ message: "Phone number must be at least 11 digits" }, { status: 400 });
       }
+
+      const hashedPassword = await bcrypt.hash(password, 10);
 
       const user = await prismadb.users.create({
         data: {
