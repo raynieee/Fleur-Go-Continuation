@@ -1,0 +1,78 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Users {
+  id             String   @id //from ClerkAuth
+  firstName      String
+  lastName       String
+  userName       String   @unique
+  email          String   @unique
+  hashedPassword String
+  role           String //seller or customer
+  phoneNumber    String   @unique @db.VarChar(11)
+  address        String
+  birthday       String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Shops {
+  id                Int            @id @default(autoincrement())
+  userId            String //from ClerkAuth
+  name              String //name of shop
+  phoneNumber       String         @unique @db.VarChar(11) //may be different from user phoneNum
+  address           String //address of shop
+  businessPermitUrl String
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  Bouquets          Bouquets[]
+  Transactions      Transactions[]
+}
+
+model Bouquets {
+  id            Int         @id @default(autoincrement())
+  name          String
+  description   String      @db.VarChar(255)
+  bouquetImgUrl String
+  price         Float
+  quantity      Int
+  isMadeToOrder Boolean
+  shop          Shops       @relation(fields: [shopId], references: [id])
+  shopId        Int
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  CartItems     CartItems[]
+}
+
+model CartItems {
+  id           Int            @id @default(autoincrement())
+  userId       String //from ClerkAuth
+  bouquet      Bouquets       @relation(fields: [bouquetId], references: [id])
+  bouquetId    Int
+  quantity     Int //amount of product w/in cart
+  Transactions Transactions[]
+}
+
+model Transactions {
+  id         Int       @id @default(autoincrement())
+  userId     String // from ClerkAuth
+  shop       Shops     @relation(fields: [shopId], references: [id])
+  shopId     Int
+  cartItem   CartItems @relation(fields: [cartItemId], references: [id])
+  cartItemId Int
+  amount     Float
+  createdAt  DateTime  @default(now())
+  status     String //for determining order status (i.e. pending, completed )
+}
