@@ -7,5 +7,5 @@ const port = process.env.NEXT_PUBLIC_SERVER_URL || 8080;
 const app = createServer();
 
 app.listen(port, () => {
-  console.log(`[server]: Server is running at http://localhost:${port}`);
+  console.log(`Server is running on port ${port}`);
 });
