@@ -10,11 +10,31 @@ export function createTransaction(app: Express) {
         return res.status(400).json({ message: "All fields are required" });
       }
 
+      const cartItem = await prismadb.cartItems.findUnique({
+        where: { id: Number(cartItemId) },
+        include: { bouquet: true } //cartItems relating to bouquets
+      });
+
+      if (!cartItem) {
+        return res.status(404).json({ message: "Cart item not found" });
+      }
+
+      const newQuantity = cartItem.bouquet.quantity - cartItem.quantity;
+
+      if (newQuantity < 0) {
+        return res.status(400).json({ message: "Insufficient quantity available" });
+      }
+
+      await prismadb.bouquets.update({
+        where: { id: cartItem.bouquet.id },
+        data: { quantity: newQuantity }
+      });
+
       const transaction = await prismadb.transactions.create({
         data: {
           userId,
           amount,
-          status,
+          status: "pending",
           shopId: Number(shopId),
           cartItemId: Number(cartItemId),
         },
@@ -40,26 +60,24 @@ export function getAllTransactions(app: Express) {
   });
 }
 
-export function getTransactionById(app: Express) {
-  app.get("/transactions/:transactionId", async (req: Request, res: Response) => {
+export function updateTransactionStatus(app: Express) {
+  app.put("/transactions/:id/status", async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    if (!status) {
+      return res.status(400).json({ message: "Status is required" });
+    }
+
     try {
-      const { transactionId } = req.params;
-
-      if (!transactionId) {
-        return res.status(400).json({ message: "Transaction ID is required" });
-      }
-
-      const transaction = await prismadb.transactions.findUnique({
-        where: { id: Number(transactionId) },
+      const transaction = await prismadb.transactions.update({
+        where: { id: Number(id) },
+        data: { status },
       });
-
-      if (!transaction) {
-        return res.status(404).json({ message: "Transaction not found" });
-      }
 
       return res.status(200).json(transaction);
     } catch (error) {
-      console.error("GET_TRANSACTION_BY_ID_ERROR", error);
+      console.error("UPDATE_TRANSACTION_STATUS_ERROR", error);
       return res.status(500).json({ message: "Internal Server Error" });
     }
   });

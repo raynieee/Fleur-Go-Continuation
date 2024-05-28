@@ -53,7 +53,7 @@ async function seedBouquets() {
     data: {
       name: 'Rose Bouquet',
       description: 'A beautiful bouquet of red roses',
-      bouquetImgUrl: 'https://labellarosaflowers.com/cdn/shop/products/0A0276A1-B301-4E4A-AF90-AA1D4DA48915.jpg?v=1653583768&width=713',
+      bouquetImgUrl: 'https://expressflower.ph/image/cache/data/year-2020/viber_image_2020-02-11_21-21-45-500x500.jpg',
       price: 29.99,
       quantity: 10,
       isMadeToOrder: false,
