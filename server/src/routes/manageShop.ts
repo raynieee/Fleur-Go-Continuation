@@ -10,7 +10,7 @@ export function createShop(app: Express) {
     try {
       const { name, phoneNumber, address, businessPermitUrl } = req.body;
 
-      if (!name || !phoneNumber || !address) {
+      if (!name || !phoneNumber || !address || !businessPermitUrl) {
         return res.status(400).json({ message: "Name, phone number, and address are required" });
       }
 
@@ -36,17 +36,17 @@ export function createShop(app: Express) {
   });
 }
 
-export function getShopDetails(app: Express) {
-  app.get("/admin/shops/:shopId", async (req: Request, res: Response) => {
+export function getUserShopDetails(app: Express) {
+  app.get("/admin/shops/:userId", async (req: Request, res: Response) => {
     try {
-      const { shopId } = req.params;
+      const { userId } = req.params;
 
-      if (!shopId) {
-        return res.status(400).json({ message: "Shop ID is required" });
+      if (!userId) {
+        return res.status(400).json({ message: "User ID is required" });
       }
 
-      const shop = await prismadb.shops.findUnique({
-        where: { id: Number(shopId) },
+      const shop = await prismadb.shops.findFirst({
+        where: { userId: String(userId) },
       });
 
       if (!shop) {
@@ -55,7 +55,7 @@ export function getShopDetails(app: Express) {
 
       return res.status(200).json(shop);
     } catch (error) {
-      console.log("GET_SHOP_DETAILS_ERROR", error);
+      console.log("GET_USER_SHOP_DETAILS_ERROR", error);
       return res.status(500).json({ message: "Internal Error" });
     }
   });

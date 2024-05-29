@@ -1,13 +1,33 @@
-// Assuming this is the corrected file path
-'use client';
-
-import { useRouter } from 'next/navigation'; // Corrected import path
+"use client";
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@clerk/nextjs';
-import { ClerkProvider, SignInButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs';
+import { SignedIn, UserButton } from '@clerk/nextjs';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 
-const Header = () => {
+const Header: React.FC = () => {
   const router = useRouter();
-  const { isSignedIn, signOut } = useAuth();
+  const { isSignedIn, signOut, userId } = useAuth();
+  const [hasShop, setHasShop] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    if (isSignedIn && userId) {
+      const checkUserShop = async () => {
+        try {
+          const response = await axios.get(`/admin/shops/${userId}`);
+          if (response.data && response.data.shopId) {
+            setHasShop(true);
+          } else {
+            setHasShop(false);
+          }
+        } catch (error) {
+          console.error('Failed to fetch shop data:', error);
+          setHasShop(false);
+        }
+      };
+      checkUserShop();
+    }
+  }, [isSignedIn, userId]);
 
   const navigateTo = (path: string) => {
     router.push(path);
@@ -16,6 +36,15 @@ const Header = () => {
   const handleSignOut = (event: React.MouseEvent<HTMLLIElement>) => {
     event.preventDefault();
     signOut();
+  };
+
+  const handleMyShopClick = () => {
+    if (hasShop === null) return; // Prevent navigation if the check is not complete
+    if (hasShop) {
+      navigateTo('/myStore');
+    } else {
+      navigateTo('/createStore');
+    }
   };
 
   return (
@@ -29,7 +58,7 @@ const Header = () => {
         </div>
         <ul className="font-semibold flex space-x-4 text-xs">
           <li
-            onClick={() => navigateTo('/my-store')}
+            onClick={handleMyShopClick}
             className="cursor-pointer hover:text-primary hover:text-white"
           >
             My Shop
@@ -41,10 +70,10 @@ const Header = () => {
             About
           </li>
           <li
-            onClick={() => navigateTo('/contact')}
+            onClick={() => navigateTo('/create-order')}
             className="cursor-pointer hover:text-primary hover:text-white"
           >
-            Contact
+            Cart
           </li>
           {!isSignedIn && (
             <li

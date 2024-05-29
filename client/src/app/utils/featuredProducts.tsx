@@ -6,9 +6,10 @@ interface Product {
   id: number;
   name: string;
   price: number;
-  bouquetImgUrl: string; // Assuming optional image property
+  bouquetImgUrl: string;
   quantity: number;
   description: string;
+  shopName: string; // Add shop information
 }
 
 const FeaturedProducts: React.FC = () => {
@@ -40,27 +41,41 @@ const FeaturedProducts: React.FC = () => {
     return <div className="text-center p-5">{error}</div>;
   }
 
+  // Group products by shop name
+  const groupedProducts = products.reduce((acc: Record<string, Product[]>, product) => {
+    if (!acc[product.shopName]) {
+      acc[product.shopName] = [];
+    }
+    acc[product.shopName].push(product);
+    return acc;
+  }, {});
+
   return (
     <section className="px-6 py-6">
       <h2 className="text-green-700 text-2xl font-bold mb-6">Featured Products</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {products.map((product) => (
-          <Card key={product.id} className="product bg-white shadow-lg rounded-lg overflow-hidden">
-            <img src={product.bouquetImgUrl || '/default-image.jpg'} alt={product.name} className="w-full h-48 object-cover" />
-            <CardHeader className="">
-              <CardTitle className="text-lg font-semibold">{product.name}</CardTitle>
-              <CardDescription className="text-gray-500">${product.price}</CardDescription>
-              <CardDescription className="text-gray-700">Quantity: {product.quantity}</CardDescription>
-            </CardHeader>
-            <CardContent className="text-xs">
-              {product.description}
-            </CardContent>
-            <CardFooter className="p-4 flex justify-end">
-              <button className="bg-green-600 hover:bg-green-700 text-white font-semibold py-1 px-4 rounded">Add to Cart</button>
-            </CardFooter>
-          </Card>
-        ))}
-      </div>
+      {Object.entries(groupedProducts).map(([shopName, shopProducts]) => (
+        <div key={shopName} className="mb-12">
+          <h3 className="text-xl font-bold mb-4">{shopName}</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {shopProducts.map((product) => (
+              <Card key={product.id} className="product bg-white shadow-lg rounded-lg overflow-hidden">
+                <img src={product.bouquetImgUrl || '/default-image.jpg'} alt={product.name} className="w-full h-48 object-cover" />
+                <CardHeader>
+                  <CardTitle className="text-lg font-semibold">{product.name}</CardTitle>
+                  <CardDescription className="text-gray-500">${product.price}</CardDescription>
+                  <CardDescription className="text-gray-700">Quantity: {product.quantity}</CardDescription>
+                </CardHeader>
+                <CardContent className="text-xs">
+                  {product.description}
+                </CardContent>
+                <CardFooter className="p-4 flex justify-end">
+                  <button className="bg-green-600 hover:bg-green-700 text-white font-semibold py-1 px-4 rounded">Add to Cart</button>
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
+        </div>
+      ))}
     </section>
   );
 };

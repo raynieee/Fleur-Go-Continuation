@@ -48,18 +48,6 @@ export function createTransaction(app: Express) {
   });
 }
 
-export function getAllTransactions(app: Express) {
-  app.get("/transactions", async (req: Request, res: Response) => {
-    try {
-      const transactions = await prismadb.transactions.findMany();
-      return res.status(200).json(transactions);
-    } catch (error) {
-      console.error("GET_ALL_TRANSACTIONS_ERROR", error);
-      return res.status(500).json({ message: "Internal Server Error" });
-    }
-  });
-}
-
 export function updateTransactionStatus(app: Express) {
   app.put("/transactions/:id/status", async (req: Request, res: Response) => {
     const { id } = req.params;
@@ -83,22 +71,59 @@ export function updateTransactionStatus(app: Express) {
   });
 }
 
-export function deleteTransactionById(app: Express) {
-  app.delete("/transactions/:transactionId", async (req: Request, res: Response) => {
+export function deleteTransactionByUserId(app: Express) {
+  app.delete("/transactions/user/:userId/:transactionId", async (req: Request, res: Response) => {
     try {
-      const { transactionId } = req.params;
+      const { userId, transactionId } = req.params;
 
-      if (!transactionId) {
-        return res.status(400).json({ message: "Transaction ID is required" });
+      if (!userId || !transactionId) {
+        return res.status(400).json({ message: "User ID and Transaction ID are required" });
       }
 
-      const transaction = await prismadb.transactions.delete({
+      const transaction = await prismadb.transactions.findFirst({
+        where: { id: Number(transactionId), userId: userId },
+      });
+
+      if (!transaction) {
+        return res.status(404).json({ message: "Transaction not found" });
+      }
+
+      await prismadb.transactions.delete({
         where: { id: Number(transactionId) },
       });
 
-      return res.status(200).json(transaction);
+      return res.status(200).json({ message: "Transaction deleted successfully" });
     } catch (error) {
-      console.error("DELETE_TRANSACTION_BY_ID_ERROR", error);
+      console.error("DELETE_TRANSACTION_BY_USER_ID_ERROR", error);
+      return res.status(500).json({ message: "Internal Server Error" });
+    }
+  });
+}
+
+export function deleteTransactionByShopId(app: Express) {
+  app.delete("/transactions/shop/:shopId/:transactionId", async (req: Request, res: Response) => {
+    try {
+      const { shopId, transactionId } = req.params;
+
+      if (!shopId || !transactionId) {
+        return res.status(400).json({ message: "Shop ID and Transaction ID are required" });
+      }
+
+      const transaction = await prismadb.transactions.findFirst({
+        where: { id: Number(transactionId), shopId: Number(shopId) },
+      });
+
+      if (!transaction) {
+        return res.status(404).json({ message: "Transaction not found" });
+      }
+
+      await prismadb.transactions.delete({
+        where: { id: Number(transactionId) },
+      });
+
+      return res.status(200).json({ message: "Transaction deleted successfully" });
+    } catch (error) {
+      console.error("DELETE_TRANSACTION_BY_SHOP_ID_ERROR", error);
       return res.status(500).json({ message: "Internal Server Error" });
     }
   });

@@ -1,13 +1,57 @@
 import prismadb from "../src/lib/prismadb";
 import bcrypt from 'bcrypt';
+import { createClerkClient } from '@clerk/clerk-sdk-node';
+
+const clerkOptions: any = {
+  apiKey: process.env.CLERK_API_KEY,
+  secretKey: process.env.CLERK_SECRET_KEY,
+};
+
+const clerk = createClerkClient(clerkOptions);
 
 async function seedUsers() {
+  // const clerkUser1 = await clerk.users.createUser({
+  //   emailAddress: ['johndoe@example.com'],
+  //   firstName: 'John',
+  //   lastName: 'Doe',
+  //   username: 'johndoe',
+  //   password: 'WC796yKPhIMg3UQ',
+  // });
+
+  // const clerkUser2 = await clerk.users.createUser({
+  //   emailAddress: ['janesmith@example.com'],
+  //   firstName: 'Jane',
+  //   lastName: 'Smith',
+  //   username: 'janesmith',
+  //   password: 'sYNaz5aozQXjFv4',
+  // });
+  
+  async function getUserByEmail(emailAddress: string[]): Promise<any | null> {
+    try {
+      const { data } = await clerk.users.getUserList({
+        emailAddress,
+        limit: 1,
+      });
+      if (data.length > 0) {
+        return data[0];
+      } else {
+        throw new Error(`User with email address ${emailAddress} not found`);
+      }
+    } catch (error) {
+      console.error(`Error getting user details for email address ${emailAddress}:`, error);
+      return null;
+    }
+  }
+  
+  const clerkUser1 = await getUserByEmail(['johndoe@example.com']);
+  const clerkUser2 = await getUserByEmail(['janesmith@example.com']);
+
   const hashedPassword1 = await bcrypt.hash('password123', 10);
   const hashedPassword2 = await bcrypt.hash('password456', 10);
 
   await prismadb.users.create({
     data: {
-      id: 'user1',
+      id: clerkUser1.id,
       firstName: 'John',
       lastName: 'Doe',
       userName: 'johndoe',
@@ -22,7 +66,7 @@ async function seedUsers() {
 
   await prismadb.users.create({
     data: {
-      id: 'user2',
+      id: clerkUser2.id,
       firstName: 'Jane',
       lastName: 'Smith',
       userName: 'janesmith',
@@ -37,9 +81,28 @@ async function seedUsers() {
 }
 
 async function seedShops() {
+  async function getUserByEmail(emailAddress: string[]): Promise<any | null> {
+    try {
+      const { data } = await clerk.users.getUserList({
+        emailAddress,
+        limit: 1,
+      });
+      if (data.length > 0) {
+        return data[0];
+      } else {
+        throw new Error(`User with email address ${emailAddress} not found`);
+      }
+    } catch (error) {
+      console.error(`Error getting user details for email address ${emailAddress}:`, error);
+      return null;
+    }
+  }
+
+  const clerkUser1 = await getUserByEmail(['johndoe@example.com']);
+  
   await prismadb.shops.create({
     data: {
-      userId: 'user1', 
+      userId: clerkUser1.id, 
       name: `John's Flower Shop`,
       phoneNumber: '0987654321',
       address: '456 Elm Street',
