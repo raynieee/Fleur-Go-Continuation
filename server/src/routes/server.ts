@@ -1,9 +1,8 @@
 import express from "express";
 import cors from "cors";
-import { getInventory, updateInventory } from "./manageInventory";
 import {
   addBouquet,
-  getAllBouquets,
+  getAllBouquetsWithShopNames,
   getBouquetsByShopId,
   updateBouquet,
   deleteBouquet,
@@ -16,15 +15,15 @@ import {
 } from "./manageCartItems";
 import {
   createShop,
-  getShopDetails,
+  getUserShopDetails,
   updateShop,
   deleteShop,
 } from "./manageShop";
 import {
   createTransaction,
-  getAllTransactions,
-  getTransactionById,
-  deleteTransactionById,
+  updateTransactionStatus,
+  deleteTransactionByUserId,
+  deleteTransactionByShopId,
   getTransactionsByUserId,
   getTransactionsByShopId,
   getTransactionByIdUnderUserId,
@@ -45,11 +44,8 @@ function createServer() {
   app.use(cors());
   app.use(express.json());
 
-  getInventory(app);
-  updateInventory(app);
-
   addBouquet(app);
-  getAllBouquets(app);
+  getAllBouquetsWithShopNames(app);
   getBouquetsByShopId(app);
   updateBouquet(app);
   deleteBouquet(app);
@@ -60,14 +56,14 @@ function createServer() {
   removeCartItem(app);
 
   createShop(app);
-  getShopDetails(app);
+  getUserShopDetails(app);
   updateShop(app);
   deleteShop(app);
 
   createTransaction(app);
-  getAllTransactions(app);
-  getTransactionById(app);
-  deleteTransactionById(app);
+  updateTransactionStatus(app);
+  deleteTransactionByUserId(app);
+  deleteTransactionByShopId(app);
   getTransactionsByUserId(app);
   getTransactionsByShopId(app);
   getTransactionByIdUnderUserId(app);

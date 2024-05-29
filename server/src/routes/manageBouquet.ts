@@ -60,11 +60,25 @@ export function addBouquet(app: Express) {
   });
 }
 
-export function getAllBouquets(app: Express) {
+export function getAllBouquetsWithShopNames(app: Express) {
   app.get("/bouquets", async (req: Request, res: Response) => {
     try {
-      const bouquets = await prismadb.bouquets.findMany();
-      return res.status(200).json(bouquets);
+      const bouquets = await prismadb.bouquets.findMany({
+        include: {
+          shop: { 
+            select: {
+              name: true, //get name of shop
+            },
+          },
+        },
+      });
+
+      const bouquetsWithShopNames = bouquets.map(bouquet => ({
+        ...bouquet,
+        shopName: bouquet.shop.name,
+      }));
+
+      return res.status(200).json(bouquetsWithShopNames);
     } catch (error) {
       console.log("GET_ALL_BOUQUETS_ERROR", error);
       return res.status(500).json({ message: "Internal Error" });
